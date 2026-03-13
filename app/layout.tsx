@@ -7,26 +7,27 @@ const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'Invoice Generator - Fabby Foods',
-  description: 'Professional invoice generator with Fabby Foods branding. Generate, download, and print invoices with automatic tax calculations.',
-  generator: 'v0.app',
+  title: 'Invoice Generator - Fabby G International',
+  description: 'Professional invoice generator for Fabby G International Limited. Create beautiful invoices quickly and easily.',
   icons: {
     icon: [
       {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
+        url: '/favicon.ico',
       },
       {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
+        url: '/favicon-16x16.png',
+        sizes: '16x16',
+        type: 'image/png',
       },
       {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
+        url: '/favicon-32x32.png',
+        sizes: '32x32',
+        type: 'image/png',
       },
     ],
-    apple: '/apple-icon.png',
+    apple: '/apple-touch-icon.png',
   },
+  manifest: '/site.webmanifest',
 }
 
 export default function RootLayout({
@@ -36,9 +37,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-      </head>
       <body className="font-sans antialiased">
         {children}
         <Analytics />

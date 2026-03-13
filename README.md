@@ -1,35 +1,53 @@
-# fabby-foods-invoice-generator
+# Invoice Generator - Fabby G International
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [v0](https://v0.app).
+A beautiful, mobile-first invoice generator built for Fabby G International Limited.
 
-## Built with v0
+## Features
 
-This repository is linked to a [v0](https://v0.app) project. You can continue developing by visiting the link below -- start new chats to make changes, and v0 will push commits directly to this repo. Every merge to `main` will automatically deploy.
+✨ **Mobile-First Design** - Optimized for mobile devices with responsive layouts  
+🎨 **Beautiful UI** - Modern, aesthetic design with orange brand colors  
+📱 **Touch-Friendly** - Large buttons and inputs for easy mobile interaction  
+🏢 **Permanent Issuer Details** - Pre-configured with Fabby G International information  
+⏰ **Auto Date & Time** - Automatically fills current date and time  
+💰 **Nigerian Naira (₦)** - Currency formatted for Nigerian market  
+📄 **PDF Export** - Download invoices as PDF  
+🖨️ **Print Ready** - Optimized for printing  
 
-[Continue working on v0 →](https://v0.app/chat/projects/prj_swq0GkpSQXlAKkIUmaoah9VuyX6b)
+## Company Details (Permanent)
+
+- **Company**: Fabby G International Limited
+- **Contact**: Ayoola Odejayi
+- **Account**: 3021173586 (FirstBank)
+- **Address**: Olora Layout along Housing Road Adebayo, Ado Ekiti, Ekiti
+- **Phone**: 08060808831
+- **Country**: Nigeria
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+# Install dependencies
+pnpm install
+
+# Run development server
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to view the app.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Usage
 
-## Learn More
+1. Fill in customer details (name, address, city)
+2. Add invoice items with descriptions, quantities, and prices
+3. Add optional notes
+4. Click "Generate Invoice" to preview
+5. Download as PDF or print directly
 
-To learn more, take a look at the following resources:
+## Tech Stack
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-- [v0 Documentation](https://v0.app/docs) - learn about v0 and how to use it.
-
-<a href="https://v0.app/chat/api/kiro/clone/gigscode/fabby-foods-invoice-generator" alt="Open in Kiro"><img src="https://pdgvvgmkdvyeydso.public.blob.vercel-storage.com/open%20in%20kiro.svg?sanitize=true" /></a>
+- Next.js 16
+- React 19
+- TypeScript
+- Tailwind CSS
+- Shadcn UI Components
+- React Hook Form + Zod validation
+- html2pdf.js for PDF generation

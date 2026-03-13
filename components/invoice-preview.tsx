@@ -3,16 +3,17 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Download, Printer } from 'lucide-react';
-import { formatCurrency, calculateLineItemTotal, calculateTaxAmount } from '@/lib/pdf-utils';
-import { generatePDF } from '@/lib/pdf-utils';
+import { Download, Printer, ArrowLeft } from 'lucide-react';
+import { formatCurrency, calculateLineItemTotal, formatInvoiceTime, generatePDF } from '@/lib/pdf-utils';
 import type { InvoiceFormData } from '@/lib/types';
+import Image from 'next/image';
 
 export interface InvoicePreviewProps {
   data: InvoiceFormData;
+  onBack?: () => void;
 }
 
-export function InvoicePreview({ data }: InvoicePreviewProps) {
+export function InvoicePreview({ data, onBack }: InvoicePreviewProps) {
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
   const handlePrintClick = () => {
@@ -22,7 +23,7 @@ export function InvoicePreview({ data }: InvoicePreviewProps) {
   const handleDownloadPDF = async () => {
     try {
       setIsGeneratingPDF(true);
-      await generatePDF('invoice-content', `Invoice-${data.invoiceNumber}.pdf`);
+      await generatePDF(data, `Invoice-${data.invoiceNumber}.pdf`);
     } catch (error) {
       console.error('Failed to generate PDF:', error);
       alert('Failed to generate PDF. Please try again.');
@@ -33,146 +34,121 @@ export function InvoicePreview({ data }: InvoicePreviewProps) {
 
   // Calculate totals
   const itemsWithTotals = data.items.map((item) => {
-    const subtotal = calculateLineItemTotal(item.quantity, item.rate);
-    const tax = calculateTaxAmount(subtotal, item.tax);
-    const total = subtotal + tax;
-    return { ...item, subtotal, tax, total };
+    const total = calculateLineItemTotal(item.quantity, item.rate);
+    return { ...item, total };
   });
 
-  const grandSubtotal = itemsWithTotals.reduce((sum, item) => sum + item.subtotal, 0);
-  const grandTax = itemsWithTotals.reduce((sum, item) => sum + item.tax, 0);
   const grandTotal = itemsWithTotals.reduce((sum, item) => sum + item.total, 0);
 
   return (
-    <div className="space-y-4">
-      {/* Action Buttons */}
-      <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 print:hidden">
-        <Button
-          onClick={handlePrintClick}
-          variant="outline"
-          className="flex-1 py-2 sm:py-3 text-xs sm:text-sm font-medium"
-        >
-          <Printer className="h-4 w-4 mr-2" />
-          Print / Save as PDF
-        </Button>
-        <Button
-          onClick={handleDownloadPDF}
-          disabled={isGeneratingPDF}
-          className="flex-1 py-2 sm:py-3 text-xs sm:text-sm font-medium bg-orange-500 hover:bg-orange-600 text-white"
-        >
-          <Download className="h-4 w-4 mr-2" />
-          {isGeneratingPDF ? 'Generating...' : 'Download PDF'}
-        </Button>
-      </div>
-
+    <div className="w-full max-w-4xl mx-auto space-y-4">
       {/* Invoice */}
-      <Card className="print:shadow-none print:border-0">
+      <Card className="print:shadow-none print:border-0 shadow-xl">
         <CardContent className="p-0" id="invoice-content">
-          <div className="bg-white p-4 sm:p-6 md:p-8 min-h-screen flex flex-col">
+          <div className="bg-white p-6 sm:p-8 md:p-12" style={{ backgroundColor: '#ffffff' }}>
             {/* Header with Logo */}
-            <div className="mb-6 sm:mb-8">
-              <div className="flex items-center justify-center mb-4 sm:mb-6">
-                <img
-                  src="/fabby-foods-logo.jpg"
-                  alt="Fabby Foods"
-                  className="h-16 sm:h-20 md:h-24 object-contain"
-                />
-              </div>
-              <div className="text-center border-b-2 border-orange-400 pb-3 sm:pb-4">
-                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-orange-600" style={{ fontFamily: 'Georgia, serif' }}>
-                  INVOICE
-                </h1>
-              </div>
-            </div>
-
-            {/* Invoice Metadata */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8 text-xs sm:text-sm">
-              <div>
-                <p className="text-gray-600 font-semibold text-xs">INVOICE #</p>
-                <p className="text-sm sm:text-lg font-bold text-gray-900">{data.invoiceNumber}</p>
-              </div>
-              <div>
-                <p className="text-gray-600 font-semibold text-xs">DATE</p>
-                <p className="text-sm sm:text-lg font-bold text-gray-900">
-                  {new Date(data.invoiceDate).toLocaleDateString('en-IN', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                  })}
-                </p>
-              </div>
-              <div>
-                <p className="text-gray-600 font-semibold text-xs">DUE DATE</p>
-                <p className="text-sm sm:text-lg font-bold text-gray-900">
-                  {new Date(data.dueDate).toLocaleDateString('en-IN', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                  })}
-                </p>
+            <div className="mb-8 pb-6" style={{ borderBottom: '4px solid #f97316' }}>
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden shadow-lg" style={{ border: '4px solid #f97316' }}>
+                    <Image
+                      src="/fabby.jpg"
+                      alt="Fabby G International"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <div>
+                    <h1 className="text-xl sm:text-2xl font-bold" style={{ color: '#111827' }}>
+                      Fabby G International Limited
+                    </h1>
+                    <p className="text-xs sm:text-sm font-medium" style={{ color: '#ea580c' }}>FabbyGinternational</p>
+                  </div>
+                </div>
+                <div className="text-center sm:text-right">
+                  <h2 className="text-3xl sm:text-4xl font-bold" style={{ color: '#ea580c' }}>INVOICE</h2>
+                  <p className="text-sm mt-1" style={{ color: '#4b5563' }}>{data.invoiceNumber}</p>
+                </div>
               </div>
             </div>
 
-            {/* From & To */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8 mb-6 sm:mb-8">
-              {/* From */}
-              <div>
-                <p className="text-xs font-bold text-orange-600 uppercase tracking-widest mb-2">
+            {/* Company & Customer Info */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 mb-8">
+              {/* From - Permanent Details */}
+              <div className="p-4 sm:p-5 rounded-lg" style={{ backgroundColor: '#fff7ed', borderLeft: '4px solid #f97316' }}>
+                <p className="text-xs font-bold uppercase tracking-wider mb-3" style={{ color: '#c2410c' }}>
                   From
                 </p>
-                <div className="text-xs sm:text-sm text-gray-800 space-y-0.5">
-                  <p className="font-bold text-sm sm:text-lg">{data.fromCompany}</p>
-                  <p>{data.fromAddress}</p>
-                  <p>{data.fromCity}</p>
-                  <p className="font-semibold">{data.fromPhone}</p>
+                <div className="text-sm space-y-1" style={{ color: '#1f2937' }}>
+                  <p className="font-bold text-base" style={{ color: '#111827' }}>Fabby G International Limited</p>
+                  <p className="font-semibold" style={{ color: '#c2410c' }}>Ayoola Odejayi</p>
+                  <p className="font-medium">Acct No. 3021173586 (FirstBank)</p>
+                  <p>Olora Layout along Housing Road Adebayo</p>
+                  <p>Ado Ekiti, Ekiti</p>
+                  <p className="font-semibold" style={{ color: '#111827' }}>08060808831</p>
+                  <p className="font-medium">Nigeria</p>
                 </div>
               </div>
 
-              {/* To */}
-              <div>
-                <p className="text-xs font-bold text-orange-600 uppercase tracking-widest mb-2">
+              {/* To - Customer Details */}
+              <div className="p-4 sm:p-5 rounded-lg" style={{ backgroundColor: '#f9fafb', borderLeft: '4px solid #9ca3af' }}>
+                <p className="text-xs font-bold uppercase tracking-wider mb-3" style={{ color: '#374151' }}>
                   Bill To
                 </p>
-                <div className="text-xs sm:text-sm text-gray-800 space-y-0.5">
-                  <p className="font-bold text-sm sm:text-lg">{data.toName}</p>
+                <div className="text-sm space-y-1" style={{ color: '#1f2937' }}>
+                  <p className="font-bold text-base" style={{ color: '#111827' }}>{data.toName}</p>
                   <p>{data.toAddress}</p>
                   <p>{data.toCity}</p>
-                  <p className="break-all">{data.toEmail}</p>
                 </div>
+              </div>
+            </div>
+
+            {/* Date & Time */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8 p-4 rounded-lg" style={{ background: 'linear-gradient(to right, #fff7ed, #ffedd5)' }}>
+              <div>
+                <p className="text-xs font-semibold uppercase mb-1" style={{ color: '#c2410c' }}>Invoice Date</p>
+                <p className="text-sm font-bold" style={{ color: '#111827' }}>
+                  {new Date(data.invoiceDate).toLocaleDateString('en-GB', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric',
+                  })}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase mb-1" style={{ color: '#c2410c' }}>Time</p>
+                <p className="text-sm font-bold" style={{ color: '#111827' }}>{formatInvoiceTime(data.invoiceTime)}</p>
               </div>
             </div>
 
             {/* Items Table */}
-            <div className="mb-6 sm:mb-8 flex-1 overflow-x-auto">
-              <table className="w-full text-xs sm:text-sm">
+            <div className="mb-8 overflow-x-auto">
+              <table className="w-full text-sm" style={{ borderCollapse: 'collapse' }}>
                 <thead>
-                  <tr className="bg-orange-50 border-b-2 border-orange-400">
-                    <th className="text-left p-2 sm:p-3 font-bold text-orange-900">Description</th>
-                    <th className="text-center p-2 sm:p-3 font-bold text-orange-900 w-12 sm:w-20">Qty</th>
-                    <th className="text-right p-2 sm:p-3 font-bold text-orange-900 w-16 sm:w-24">Rate</th>
-                    <th className="text-right p-2 sm:p-3 font-bold text-orange-900 w-16 sm:w-20">Amount</th>
-                    <th className="text-right p-2 sm:p-3 font-bold text-orange-900 hidden sm:table-cell">Tax</th>
-                    <th className="text-right p-2 sm:p-3 font-bold text-orange-900 w-16 sm:w-24">Total</th>
+                  <tr style={{ background: 'linear-gradient(to right, #f97316, #ea580c)', color: '#ffffff' }}>
+                    <th className="text-left p-3 font-bold rounded-tl-lg">#</th>
+                    <th className="text-left p-3 font-bold">Item Description</th>
+                    <th className="text-center p-3 font-bold">Qty</th>
+                    <th className="text-right p-3 font-bold">Rate</th>
+                    <th className="text-right p-3 font-bold rounded-tr-lg">Amount</th>
                   </tr>
                 </thead>
                 <tbody>
                   {itemsWithTotals.map((item, index) => (
                     <tr
                       key={index}
-                      className="border-b border-gray-200 hover:bg-gray-50"
+                      style={{ 
+                        borderBottom: '1px solid #e5e7eb',
+                        backgroundColor: index % 2 === 0 ? '#ffffff' : '#f9fafb'
+                      }}
                     >
-                      <td className="p-2 sm:p-3 text-gray-800">{item.description}</td>
-                      <td className="text-center p-2 sm:p-3 text-gray-800">{item.quantity}</td>
-                      <td className="text-right p-2 sm:p-3 text-gray-800">
+                      <td className="p-3 font-medium" style={{ color: '#4b5563' }}>{index + 1}</td>
+                      <td className="p-3 font-medium" style={{ color: '#1f2937' }}>{item.description}</td>
+                      <td className="text-center p-3" style={{ color: '#1f2937' }}>{item.quantity}</td>
+                      <td className="text-right p-3" style={{ color: '#1f2937' }}>
                         {formatCurrency(item.rate)}
                       </td>
-                      <td className="text-right p-2 sm:p-3 text-gray-800">
-                        {formatCurrency(item.subtotal)}
-                      </td>
-                      <td className="text-right p-2 sm:p-3 text-gray-800 hidden sm:table-cell">
-                        {formatCurrency(item.tax)}
-                      </td>
-                      <td className="text-right p-2 sm:p-3 font-semibold text-gray-900">
+                      <td className="text-right p-3 font-semibold" style={{ color: '#111827' }}>
                         {formatCurrency(item.total)}
                       </td>
                     </tr>
@@ -181,55 +157,72 @@ export function InvoicePreview({ data }: InvoicePreviewProps) {
               </table>
             </div>
 
-            {/* Totals */}
-            <div className="flex justify-end mb-6 sm:mb-8">
-              <div className="w-64 sm:w-80">
-                <div className="flex justify-between items-center p-2 sm:p-3 bg-gray-50 border-b border-gray-200 text-xs sm:text-sm">
-                  <span className="font-semibold text-gray-700">Subtotal</span>
-                  <span className="text-gray-900">{formatCurrency(grandSubtotal)}</span>
-                </div>
-                <div className="flex justify-between items-center p-2 sm:p-3 bg-gray-50 border-b border-gray-200 text-xs sm:text-sm">
-                  <span className="font-semibold text-gray-700">Tax</span>
-                  <span className="text-gray-900">{formatCurrency(grandTax)}</span>
-                </div>
-                <div className="flex justify-between items-center p-2 sm:p-3 bg-orange-100 border-2 border-orange-400">
-                  <span className="font-bold text-orange-900 text-sm sm:text-lg">Total Amount</span>
-                  <span className="font-bold text-orange-900 text-sm sm:text-lg">
-                    {formatCurrency(grandTotal)}
-                  </span>
+            {/* Total */}
+            <div className="flex justify-end mb-8">
+              <div className="w-full sm:w-80">
+                <div className="p-5 rounded-lg shadow-lg" style={{ background: 'linear-gradient(to right, #f97316, #ea580c)', color: '#ffffff' }}>
+                  <div className="flex justify-between items-center">
+                    <span className="font-bold text-lg">TOTAL</span>
+                    <span className="font-bold text-2xl">
+                      {formatCurrency(grandTotal)}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Notes & Terms */}
-            {(data.notes || data.terms) && (
-              <div className="space-y-3 sm:space-y-4 border-t-2 border-gray-200 pt-4 sm:pt-6">
-                {data.notes && (
-                  <div>
-                    <p className="text-xs font-bold text-orange-600 uppercase tracking-widest mb-1">
-                      Notes
-                    </p>
-                    <p className="text-xs sm:text-sm text-gray-700 whitespace-pre-wrap">{data.notes}</p>
-                  </div>
-                )}
-                {data.terms && (
-                  <div>
-                    <p className="text-xs font-bold text-orange-600 uppercase tracking-widest mb-1">
-                      Terms & Conditions
-                    </p>
-                    <p className="text-xs sm:text-sm text-gray-700 whitespace-pre-wrap">{data.terms}</p>
-                  </div>
-                )}
+            {/* Notes */}
+            {data.notes && (
+              <div className="mb-8 p-4 rounded" style={{ backgroundColor: '#fefce8', borderLeft: '4px solid #facc15' }}>
+                <p className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: '#854d0e' }}>
+                  Notes
+                </p>
+                <p className="text-sm whitespace-pre-wrap" style={{ color: '#374151' }}>{data.notes}</p>
               </div>
             )}
 
             {/* Footer */}
-            <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-gray-200 text-center text-xs text-gray-600">
-              <p>Thank you for your business!</p>
+            <div className="pt-6 text-center" style={{ borderTop: '2px solid #e5e7eb' }}>
+              <p className="text-sm font-semibold mb-2" style={{ color: '#ea580c' }}>
+                It was great doing business with you.
+              </p>
+              <p className="text-xs" style={{ color: '#4b5563' }}>
+                Terms & Conditions: Please make the payment by the due date.
+              </p>
             </div>
           </div>
         </CardContent>
       </Card>
+
+      {/* Action Buttons - Bottom */}
+      <div className="flex flex-col sm:flex-row gap-2 print:hidden sticky bottom-4 z-10">
+        {onBack && (
+          <Button
+            onClick={onBack}
+            variant="outline"
+            className="flex-1 py-6 text-sm font-medium border-2 bg-white shadow-lg"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Form
+          </Button>
+        )}
+        <Button
+          onClick={handlePrintClick}
+          variant="outline"
+          className="flex-1 py-6 text-sm font-medium border-2 bg-white shadow-lg"
+        >
+          <Printer className="h-4 w-4 mr-2" />
+          Print
+        </Button>
+        <Button
+          onClick={handleDownloadPDF}
+          disabled={isGeneratingPDF}
+          className="flex-1 py-6 text-sm font-medium bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg"
+        >
+          <Download className="h-4 w-4 mr-2" />
+          {isGeneratingPDF ? 'Generating...' : 'Download PDF'}
+        </Button>
+      </div>
     </div>
   );
 }

@@ -121,6 +121,7 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   }
 }
 
@@ -142,4 +143,17 @@
   .print\:border-0 {
     border: none !important;
   }
+  
+  @page {
+    margin: 0.5cm;
+  }
+}
+
+/* PDF generation compatibility - convert oklch to rgb */
+#invoice-content * {
+  color: rgb(0, 0, 0) !important;
+}
+
+#invoice-content {
+  background: white !important;
 }
